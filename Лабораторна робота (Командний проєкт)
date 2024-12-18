@@ -1,0 +1,137 @@
+namespace WinFormsApp2
+{
+    public partial class Form1 : Form
+    {
+        private Bitmap currentImage;
+
+        public Form1()
+        {
+            InitializeComponent();
+            // PictureBox невидимий під час запуску
+            pictureBox1.Visible = false;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "BMP Files (*.bmp)|*.bmp",
+                Title = "Виберіть BMP файл"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    currentImage = new Bitmap(openFileDialog.FileName);
+                    pictureBox1.Image = currentImage;
+                    pictureBox1.Visible = true; // Робимо PictureBox видимим
+                    MessageBox.Show("Зображення завантажено успішно!");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Помилка завантаження зображення: {ex.Message}", "Помилка");
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            // Перевіряємо, чи є зображення в PictureBox
+            if (pictureBox1.Image == null)
+            {
+                MessageBox.Show("Спочатку завантажте або згенеруйте зображення.");
+                return;
+            }
+
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "BMP Files (*.bmp)|*.bmp"; // Фільтр для BMP-файлів
+                saveFileDialog.Title = "Збереження зображення";
+
+                // Перевіряємо, чи натиснуто кнопку "Зберегти"
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        // Перевіряємо, чи зображення є Bitmap
+                        if (pictureBox1.Image is Bitmap bitmapImage)
+                        {
+                            // Зберігаємо файл
+                            bitmapImage.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
+                            MessageBox.Show("Зображення успішно збережено.");
+                        }
+                        else
+                        {
+                            // Якщо зображення не Bitmap, конвертуємо його
+                            Bitmap newBitmap = new Bitmap(pictureBox1.Image);
+                            newBitmap.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
+                            newBitmap.Dispose(); // Звільняємо ресурси
+                            MessageBox.Show("Зображення успішно збережено.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Виводимо помилку у разі збою
+                        MessageBox.Show($"Помилка при збереженні: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            // Розміри зображення
+            int width = 320;
+            int height = 320;
+
+            // Створення нового BMP
+            Bitmap bmp = new Bitmap(width, height);
+
+            // Генерація випадкових кольорів для градієнта
+            Random random = new Random();
+            Color startColor = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
+            Color endColor = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    // Лінійний градієнт між стартовим і кінцевим кольорами
+                    int r = (startColor.R * (width - x) + endColor.R * x) / width;
+                    int g = (startColor.G * (width - x) + endColor.G * x) / width;
+                    int b = (startColor.B * (width - x) + endColor.B * x) / width;
+
+                    Color gradientColor = Color.FromArgb(r, g, b);
+                    bmp.SetPixel(x, y, gradientColor);
+                }
+            }
+
+            pictureBox1.Image = bmp; // Встановлюємо нове зображення в PictureBox
+            pictureBox1.Visible = true; // Робимо PictureBox видимим
+            currentImage = bmp; // Зберігаємо зображення в змінну
+            MessageBox.Show("Генерація завершена!");
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Ця програма створює BMP-файли з використанням градієнтних кольорів.");
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Розробники програми:\n- Руско Яна Миколаївна\n- Шпак Анастасія Ігорівна\n- Мізинюк Володимир Володимирович", "Про авторів");
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            // Можна залишити пустим або додати логіку
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // PictureBox залишається невидимим до завантаження або генерації
+            pictureBox1.Visible = false;
+        }
+    }
+}
